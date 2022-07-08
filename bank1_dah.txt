@@ -1,0 +1,147 @@
+#%%
+from datetime import datetime
+
+#%%
+class Account:
+    def __init__(self):
+        self._balance = 0
+        self.transactions =[]
+
+    def __check_balance(self):
+        return self._balance
+    
+    def check_transactions(self, n):
+        return list(self.transactions[:n])        
+
+    def cash_deposit(self, amount):
+        self.amount = amount
+        if amount > 0:
+            self._balance += amount
+            self.time = str(datetime.now())
+            self.transactions.append([self.time, amount, self._balance])
+        else:
+            return f"The amount must have a positive value"
+
+    def withdraw(self, amount, id_dep, limit=0):
+        self.amount = amount
+        self._balance -= amount
+        if self.amount-self._balance >=0:
+            self.time = str(datetime.now())
+            self.transactions.append([self.time, amount, self._balance, id_dep])
+        else:
+            return f"The transaction could not be executed because your balance is too low"
+                       
+
+    def deposit(self, amount, id_with):
+        self.amount = amount
+        self._balance += amount
+        self.time = str(datetime.now())
+        self.transactions.append([self.time, amount, self._balance, id_with])
+
+class YouthAccount(Account):
+    def withdraw_youth(self, amount, id_dep, limit=0):
+        if self._balance - self.amount >=limit:
+            super().withdraw(amount, id_dep)
+        else:
+            return f"The transaction could not be executed because your balance is too low"
+
+class SavingAccount(Account):
+    def withdraw_sav(self, amount, id_dep, limit=0):
+        FEE = 0.50
+        if self._balance - self.amount >=limit:
+            super().withdraw(amount, id_dep)
+            self._balance -= FEE
+        else:
+            return f"The transaction could not be executed because your balance is too low"
+    
+    def int_rate(self):
+        INT_RATE=1.005
+        self._balance *= INT_RATE
+
+class PrivateAccount(Account):
+    limit=-500
+    def withdraw_priv(self, limit, amount, id_dep):        
+        if self._balance - self.amount >= limit:
+            super().withdraw(amount, id_dep)
+        else:
+            return f"The transaction could not be executed because your balance is too low"
+
+
+#%%
+class Bank:
+    def __init__(self):
+        self.accounts = {}
+        self.id = 1
+
+    def create_account(self, type):
+        if type == "YouthAccount":
+            self.id += 1
+            self.accounts[self.id]= YouthAccount()
+            return self.id 
+        if type == "SavingAccount":
+            self.id += 1
+            self.accounts[self.id]= SavingAccount()
+            return self.id 
+        if type == "PrivateAccount":
+            self.id += 1
+            self.accounts[self.id]= PrivateAccount()
+            return self.id 
+
+    def delete_account(self, id):
+        if self.accounts[id].check_balance() == 0:
+            del self.accounts[self.id]
+        else:
+            return f"Deleting the account is not possible"
+
+    def transaction(self, id_with, id_dep, amount):
+        if id_with and id_dep in self.accounts:
+            try:
+                self.accounts[id_with].withdraw(amount, id_dep)
+                self.accounts[id_dep].deposit(amount, id_with)
+            except:
+                return f"The transaction is not allowed"
+        else:
+            return f"The account is not available"
+
+    def cash_deposit(self, amount, id):
+        try:
+            self.accounts[id].cash_deposit(amount)
+            return f"The cash deposit was successful"
+        except:
+            return f"The account is not available"
+
+    def check_balance(self, id):
+        try:
+            return self.accounts[id]._Account__check_balance()
+        except:
+            return f"The account is not available"
+
+    def check_transactions(self, id, n):
+        try:
+            return self.accounts[id].check_transactions(n)
+        except:
+            return f"The account is not available"
+
+#%%
+Sarasin = Bank()
+Sarasin.create_account("YouthAccount")
+Sarasin.create_account("PrivateAccount")
+Sarasin.cash_deposit(400,2)
+Sarasin.cash_deposit(400,3)
+Sarasin.check_transactions(3,2)
+Sarasin.check_balance(2)
+Sarasin.accounts[2].deposit(200,2)
+Sarasin.transaction(2,3,200)
+
+
+#%%
+Sarasin.transaction(2,3,200)
+Sarasin.check_balance(2)
+Sarasin.check_balance(3)
+
+# %%
+Sarasin.check_transactions(3,5)
+# %%
+Sarasin.transaction(3,2,1000)
+Sarasin.check_balance(3)
+# %%
